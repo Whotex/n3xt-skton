@@ -39,51 +39,53 @@ export default function TasksPage() {
             status[task.id] = "idle";
           }
         });
-
+  
         setTaskStatus(status);
         setTasks(data.tasks);
-      } catch (err) {
+      } catch (_error) { // ✅ Alterado de "err" para "_error"
+        console.error("Erro ao buscar as tasks:", _error);
         setError("Não existem missões no momento.");
       } finally {
         setLoading(false);
       }
     }
-
+  
     fetchTasks();
   }, []);
 
   const handleStartTask = async (taskId: string, link: string) => {
     setTaskStatus((prev) => ({ ...prev, [taskId]: "waiting" }));
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/start-task`, {
         method: "POST",
         mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          "Origin": "http://localhost:3000", // Especifica a origem correta
+          "Origin": "http://localhost:3000",
         },
         body: JSON.stringify({ task_id: taskId, user_id: userId }),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Erro ao iniciar task: ${errorText}`);
         throw new Error(errorText);
       }
-
+  
       setTimeout(() => {
         window.open(link, "_blank");
       }, 500);
-
+  
       setTimeout(() => {
         setTaskStatus((prev) => ({ ...prev, [taskId]: "claimable" }));
       }, 3000);
-    } catch (err) {
-      console.error("Erro ao iniciar task:", err);
+    } catch (_error) { // ✅ Alterado "err" para "_error"
+      console.error("Erro ao iniciar task:", _error);
       setTaskStatus((prev) => ({ ...prev, [taskId]: "idle" }));
     }
   };
+  
 
   const handleClaimTask = async (taskId: string) => {
     try {
