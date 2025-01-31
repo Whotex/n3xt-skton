@@ -30,7 +30,7 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
 
   const generateHash = (timestamp: number, jwt: string) => {
     const hmac = crypto.createHmac("sha256", SECRET_KEY);
-    hmac.update(`${timestamp}:${jwt}`); // 🔐 Combina timestamp + JWT
+    hmac.update(`${timestamp}:${jwt.replace("Bearer ", "")}`); // 🔐 Remove "Bearer " caso esteja presente
     return hmac.digest("hex"); // Retorna o hash
   };
 
@@ -59,31 +59,35 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
     if (isSending) return;
 
     try {
-      setIsSending(true);
-      const token = localStorage.getItem("jwt_token");
-      if (!token) throw new Error("Usuário não autenticado.");
+        setIsSending(true);
+        let token = localStorage.getItem("jwt_token");
+        if (!token) throw new Error("Usuário não autenticado.");
 
-      const timestamp = Date.now(); // 🔥 Garante que cada request é única
-      const hash = generateHash(timestamp, token); // 🔐 Gera um hash seguro
+        token = token.replace("Bearer ", ""); // 🔥 Remove "Bearer " caso esteja presente
 
-      const response = await fetch(`${API_BASE_URL}/click`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ timestamp, hash }), // 🔐 Envia timestamp + hash
-      });
+        const timestamp = Date.now(); // 🔥 Garante que cada request é única
+        const hash = generateHash(timestamp, token); // 🔐 Gera um hash seguro
 
-      if (!response.ok) throw new Error("Erro ao registrar clique.");
+        console.log(`📌 [FRONTEND] Enviando Click -> Timestamp: ${timestamp}, Hash: ${hash}, JWT: ${token}`);
 
-      setClicks(0);
+        const response = await fetch(`${API_BASE_URL}/click`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ timestamp, hash }), // 🔐 Envia timestamp + hash
+        });
+
+        if (!response.ok) throw new Error("Erro ao registrar clique.");
+
+        setClicks(0);
     } catch (err) {
-      console.error("Erro ao enviar cliques:", err);
+        console.error("Erro ao enviar cliques:", err);
     } finally {
-      setIsSending(false);
+        setIsSending(false);
     }
-  };
+};
 
   return (
     <div className="flex flex-col items-center gap-4 relative">
