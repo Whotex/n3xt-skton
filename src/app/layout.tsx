@@ -11,6 +11,7 @@ const pressStart2P = Press_Start_2P({
   subsets: ["latin"],
 });
 
+// Define global types for Telegram WebApp
 declare global {
   interface TelegramWebApp {
     initData?: string;
@@ -40,30 +41,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Temporariamente ignorado
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     async function authenticate() {
       try {
+        // Load Telegram WebApp SDK (ensure it's available)
+        const script = document.createElement("script");
+        script.src = "https://telegram.org/js/telegram-web-app.js?56";
+        script.async = true;
+        script.onload = () => console.log("✅ Telegram SDK Loaded");
+        document.head.appendChild(script);
+
+        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay to ensure Telegram loads
+
+        console.log("🔍 Checking Telegram WebApp...", window.Telegram?.WebApp);
+
+        if (typeof window === "undefined" || !window.Telegram?.WebApp) {
+          throw new Error("🚨 Telegram WebApp is not available.");
+        }
+
+        const tg = window.Telegram.WebApp;
+        console.log("✅ Telegram WebApp Detected:", tg);
+
+        if (!tg.initData || tg.initData === "") {
+          throw new Error("🚨 Telegram WebApp did not provide initData.");
+        }
+
         const storedToken = localStorage.getItem("jwt_token");
 
         if (storedToken) {
+          setIsAuthenticated(true);
           setLoading(false);
           return;
         }
 
-        console.log("Verificando `window.Telegram.WebApp`...", window.Telegram?.WebApp); // 🔍 Debug
-
-        if (typeof window === "undefined" || !window.Telegram?.WebApp) {
-          throw new Error("Telegram WebApp não está carregado corretamente.");
-        }
-
-        const tg = window.Telegram.WebApp;
-        console.log("Telegram WebApp Detectado:", tg);
-
-        if (!tg.initData || tg.initData === "") {
-          throw new Error("Telegram WebApp não forneceu initData.");
-        }
+        console.log("🔄 Authenticating...");
 
         const response = await fetch(`${API_URL}/authenticate`, {
           method: "POST",
@@ -71,13 +84,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           body: JSON.stringify({ initData: tg.initData }),
         });
 
-        if (!response.ok) throw new Error("Falha na autenticação.");
+        if (!response.ok) throw new Error("🚨 Authentication failed.");
 
         const data = await response.json();
         localStorage.setItem("jwt_token", data.token);
+        setIsAuthenticated(true);
       } catch (err) {
-        console.error("Erro ao autenticar no Telegram:", err);
-        setError("Erro na autenticação. Tente novamente.");
+        console.error("❌ Telegram Authentication Error:", err);
+        setError("Authentication failed. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -89,10 +103,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${pressStart2P.className} bg-gray-900 text-white antialiased relative min-h-screen`}>
-        {/* Exibir loading enquanto autentica */}
+        {/* Loading Screen While Authenticating */}
         {loading ? (
           <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-yellow-400">
-            <p className="text-lg">🔄 Carregando...</p>
+            <p className="text-lg">🔄 Loading...</p>
           </div>
         ) : error ? (
           <div className="flex flex-col justify-center items-center h-screen text-red-500">
@@ -101,12 +115,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               onClick={() => window.location.reload()}
               className="mt-4 bg-yellow-500 px-4 py-2 text-black font-bold rounded-lg hover:bg-yellow-600 transition"
             >
-              Tentar Novamente
+              Try Again
             </button>
           </div>
         ) : (
           <>
-            {/* Top Nav (SakaTON) */}
+            {/* Top Navigation */}
             <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-3 z-50 flex items-center justify-center">
               <h1 className="absolute left-1/2 transform -translate-x-1/2 text-base sm:text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 tracking-widest">
                 SakaTON
@@ -119,11 +133,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Bottom Navigation */}
             <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 p-3">
               <ul className="flex justify-around items-center">
-                {[
-                  { href: "/", label: "Home", Icon: HomeIcon },
+                {[{ href: "/", label: "Home", Icon: HomeIcon },
                   { href: "/tasks", label: "Tasks", Icon: ClipboardDocumentCheckIcon },
-                  { href: "/ranking", label: "Ranking", Icon: TrophyIcon },
-                ].map(({ href, label, Icon }) => (
+                  { href: "/ranking", label: "Ranking", Icon: TrophyIcon }].map(({ href, label, Icon }) => (
                   <li key={href}>
                     <Link
                       href={href}
