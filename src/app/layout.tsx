@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Press_Start_2P } from "next/font/google";
 import Link from "next/link";
 import { HomeIcon, ClipboardDocumentCheckIcon, TrophyIcon } from "@heroicons/react/24/outline";
@@ -15,8 +14,6 @@ const pressStart2P = Press_Start_2P({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [user, setUser] = useState<{ id: string; username: string } | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     async function authenticate() {
@@ -27,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         return;
       }
 
-      const tg = (window as any).Telegram?.WebApp;
+      const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
       if (!tg || !tg.initData) {
         setError("Erro: Não foi possível carregar os dados do Telegram.");
         setLoading(false);
@@ -45,7 +42,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         const data = await response.json();
         localStorage.setItem("jwt_token", data.token);
-        setUser(data.user);
       } catch (err) {
         console.error("Erro ao autenticar no Telegram:", err);
         setError("Erro na autenticação. Tente novamente.");
@@ -66,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <div className="flex flex-col justify-center items-center h-screen text-red-500">
         <p className="text-xl">{error}</p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => window.location.reload()} // 🔄 Atualiza a página corretamente
           className="mt-4 bg-yellow-500 px-4 py-2 text-black font-bold rounded-lg hover:bg-yellow-600 transition"
         >
           Tentar Novamente
