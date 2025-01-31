@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Press_Start_2P } from "next/font/google";
 import Link from "next/link";
 import { HomeIcon, ClipboardDocumentCheckIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import "./globals.css"; // ✅ Correct way to include global styles in Next.js
 
 const API_URL = "https://sakaton.vercel.app/api";
 
@@ -40,23 +41,22 @@ declare global {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [telegramLoaded, setTelegramLoaded] = useState(false); // 🟢 Novo estado para garantir SDK carregado
+  const [telegramLoaded, setTelegramLoaded] = useState(false); // ✅ No unused variables
 
   useEffect(() => {
     function loadTelegramSDK() {
       if (window.Telegram?.WebApp) {
-        console.log("✅ Telegram SDK já carregado.");
+        console.log("✅ Telegram SDK already loaded.");
         setTelegramLoaded(true);
         return;
       }
 
-      console.log("🔄 Carregando Telegram SDK...");
+      console.log("🔄 Loading Telegram SDK...");
       const script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-web-app.js?56";
       script.async = true;
       script.onload = () => {
-        console.log("✅ Telegram SDK Carregado.");
+        console.log("✅ Telegram SDK Loaded.");
         setTelegramLoaded(true);
       };
       document.head.appendChild(script);
@@ -67,31 +67,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     async function authenticate() {
-      if (!telegramLoaded) return; // 🔄 Aguarda SDK carregar antes de autenticar
+      if (!telegramLoaded) return; // ✅ Ensures Telegram SDK is loaded first
 
       try {
-        console.log("🔍 Verificando `window.Telegram.WebApp`...", window.Telegram?.WebApp);
+        console.log("🔍 Checking `window.Telegram.WebApp`...", window.Telegram?.WebApp);
 
         if (typeof window === "undefined" || !window.Telegram?.WebApp) {
-          throw new Error("🚨 Telegram WebApp não está disponível.");
+          throw new Error("🚨 Telegram WebApp is not available.");
         }
 
         const tg = window.Telegram.WebApp;
-        console.log("✅ Telegram WebApp Detectado:", tg);
+        console.log("✅ Telegram WebApp Detected:", tg);
 
         if (!tg.initData || tg.initData === "") {
-          throw new Error("🚨 Telegram WebApp não forneceu initData.");
+          throw new Error("🚨 Telegram WebApp did not provide initData.");
         }
 
         const storedToken = localStorage.getItem("jwt_token");
 
         if (storedToken) {
-          setIsAuthenticated(true);
           setLoading(false);
           return;
         }
 
-        console.log("🔄 Autenticando...");
+        console.log("🔄 Authenticating...");
 
         const response = await fetch(`${API_URL}/authenticate`, {
           method: "POST",
@@ -99,32 +98,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           body: JSON.stringify({ initData: tg.initData }),
         });
 
-        if (!response.ok) throw new Error("🚨 Falha na autenticação.");
+        if (!response.ok) throw new Error("🚨 Authentication failed.");
 
         const data = await response.json();
         localStorage.setItem("jwt_token", data.token);
-        setIsAuthenticated(true);
       } catch (err) {
-        console.error("❌ Erro na autenticação do Telegram:", err);
-        setError("Falha na autenticação. Tente novamente.");
+        console.error("❌ Telegram Authentication Error:", err);
+        setError("Authentication failed. Please try again.");
       } finally {
         setLoading(false);
       }
     }
 
     authenticate();
-  }, [telegramLoaded]); // 🔄 Só executa quando `telegramLoaded` for `true`
+  }, [telegramLoaded]); // ✅ Ensures authentication only runs after Telegram SDK loads
 
   return (
     <html lang="en">
-      <head>
-        <link rel="stylesheet" href="/styles/globals.css" />
-      </head>
       <body className={`${pressStart2P.className} bg-gray-900 text-white antialiased relative min-h-screen`}>
-        {/* Tela de carregamento enquanto autentica */}
+        {/* Loading Screen While Authenticating */}
         {loading ? (
           <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-yellow-400">
-            <p className="text-lg">🔄 Carregando...</p>
+            <p className="text-lg">🔄 Loading...</p>
           </div>
         ) : error ? (
           <div className="flex flex-col justify-center items-center h-screen text-red-500">
@@ -133,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               onClick={() => window.location.reload()}
               className="mt-4 bg-yellow-500 px-4 py-2 text-black font-bold rounded-lg hover:bg-yellow-600 transition"
             >
-              Tentar Novamente
+              Try Again
             </button>
           </div>
         ) : (
