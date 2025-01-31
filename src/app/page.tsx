@@ -4,13 +4,44 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Clicker from "./components/Clicker";
 
+const API_BASE_URL = "https://sakaton.vercel.app/api";
+
 export default function Home() {
-  const userId = "test-user";
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userPoints, setUserPoints] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Verifica se já mostrou a janela inicial antes (exibe apenas na primeira vez)
+    async function fetchUserData() {
+      try {
+        const token = localStorage.getItem("jwt_token");
+        if (!token) throw new Error("Usuário não autenticado.");
+
+        const response = await fetch(`${API_BASE_URL}/getPoints`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error("Erro ao buscar pontuação.");
+
+        const data = await response.json();
+        setUserPoints(data.points || 0);
+        setUserId(data.user_id); // Garante que o ID seja atualizado corretamente
+      } catch (err) {
+        console.error("Erro ao carregar dados do usuário:", err);
+        setError("Erro ao buscar dados do usuário.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
     const hasSeenPopup = localStorage.getItem("seenPopup");
     if (!hasSeenPopup) {
       setShowPopup(true);
@@ -18,9 +49,31 @@ export default function Home() {
     }
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full">
+        <p className="text-xl text-yellow-300 animate-pulse">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full">
+        <p className="text-xl text-red-500">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-yellow-500 px-4 py-2 text-black font-bold rounded-lg hover:bg-yellow-600 transition"
+        >
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-purple-900 via-black to-gray-900 overflow-hidden">
-      {/* Gradiente de fundo para efeito extra */}
+      {/* Gradiente de fundo */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-b from-transparent to-black pointer-events-none"
         initial={{ opacity: 0 }}
@@ -28,7 +81,7 @@ export default function Home() {
         transition={{ duration: 1 }}
       />
 
-      {/* 🏆 Janela flutuante - só aparece uma vez quando o usuário entra */}
+      {/* 🏆 Janela flutuante (exibe apenas na primeira vez) */}
       {showPopup && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: -50 }}
@@ -40,7 +93,6 @@ export default function Home() {
             shadow-2xl rounded-lg p-6 max-w-lg w-full text-center
             font-mono text-white z-50"
         >
-          {/* Botão de Fechar */}
           <button
             className="absolute top-2 right-2 bg-yellow-400 text-black font-bold px-2 py-1 rounded shadow-md hover:bg-yellow-500 transition"
             onClick={() => setShowPopup(false)}
@@ -48,12 +100,11 @@ export default function Home() {
             ✖
           </button>
 
-          {/* Conteúdo da Janela */}
           <h2 className="text-2xl text-yellow-400 mb-3 tracking-widest">
             🚀 Novidades!
           </h2>
           <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-            Bem-vindo ao SakaTON! Aqui você pode clicar para acumular pontos e competir no ranking global. Fique atento para novas atualizações em breve!
+            Bem-vindo ao SakaTON! Clique para acumular pontos e compita no ranking global. Fique atento para novas atualizações em breve!
           </p>
         </motion.div>
       )}
@@ -61,13 +112,12 @@ export default function Home() {
       {/* 🛠️ Sidebar flutuante na esquerda */}
       <motion.div
         animate={{
-          x: sidebarOpen ? 0 : "-85%", // Abre ou esconde
+          x: sidebarOpen ? 0 : "-90%",
         }}
         transition={{ duration: 0.3, ease: "easeOut" }}
         className="fixed top-1/4 left-0 h-60 w-64 bg-gray-900/90 backdrop-blur-md 
           border-r-4 border-yellow-400 shadow-lg rounded-r-lg p-4 z-40 flex flex-col"
       >
-        {/* Botão para abrir/fechar a sidebar */}
         <button
           className="absolute top-1/2 -right-6 transform -translate-y-1/2
             bg-yellow-400 text-black font-bold px-2 py-1 rounded-r shadow-md
@@ -77,7 +127,6 @@ export default function Home() {
           {sidebarOpen ? "❮" : "❯"}
         </button>
 
-        {/* Conteúdo da Sidebar */}
         <h2 className="text-yellow-400 text-xl tracking-widest">📢 INFO</h2>
         <p className="text-gray-300 text-sm mt-2">
           Esta seção pode ser usada para carregar dados de uma API no futuro.
@@ -86,7 +135,7 @@ export default function Home() {
 
       {/* 🎮 Área principal do Clicker */}
       <div className="z-10 flex flex-col items-center gap-6 px-4">
-        <Clicker userId={userId} />
+        {userId ? <Clicker _userId={userId} userPoints={userPoints} /> : <p className="text-yellow-300">Carregando...</p>}
       </div>
     </section>
   );

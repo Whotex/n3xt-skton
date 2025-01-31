@@ -1,55 +1,87 @@
 "use client";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { db } from "../lib/firebaseConfig";
-import { doc, setDoc, getDoc, increment } from "firebase/firestore";
 
-export default function Clicker({ userId }: { userId: string }) {
-  const [points, setPoints] = useState(0);
+import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import crypto from "crypto"; // 🔒 Usado para criar o hash SHA256
+
+const API_BASE_URL = "https://sakaton.vercel.app/api";
+const MAX_CLICKS_PER_SECOND = 8;
+const CLICKS_PER_REQUEST = 20;
+
+const SECRET_KEY = process.env.NEXT_PUBLIC_CLICKER_SECRET || "defaultSecret"; // 🔒 Frase secreta do `.env.local`
+/* eslint-disable @typescript-eslint/no-unused-vars */
+interface ClickerProps {
+  _userId: string;
+  userPoints: number | null;
+}
+
+export default function Clicker({ _userId, userPoints }: ClickerProps) {
+  const [points, setPoints] = useState(userPoints || 0);
   const [clickEffect, setClickEffect] = useState<{ x: number; y: number } | null>(null);
-  const [loading, setLoading] = useState(true); // Estado de carregamento
-  const [error, setError] = useState<string | null>(null);
+  const [clicks, setClicks] = useState<number>(0);
+  const [isSending, setIsSending] = useState(false);
+  const lastClickTimestamps = useRef<number[]>([]);
 
   useEffect(() => {
-    const fetchPoints = async () => {
-      try {
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setPoints(userSnap.data().points || 0);
-        }
-      } catch (err) {
-        console.error("Erro ao buscar pontos do usuário:", err);
-        setError("Erro ao carregar pontos.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPoints();
-  }, [userId]);
+    setPoints(userPoints || 0); // ✅ Atualiza os pontos com base no que foi recebido via prop
+  }, [userPoints]);
 
-  const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    try {
-      setPoints((prev) => prev + 1);
-      setClickEffect({ x: event.clientX, y: event.clientY });
-
-      const userRef = doc(db, "users", userId);
-      await setDoc(userRef, { points: increment(1) }, { merge: true });
-    } catch (err) {
-      console.error("Erro ao atualizar pontuação:", err);
-      setError("Erro ao registrar clique.");
-    } finally {
-      setTimeout(() => setClickEffect(null), 1000);
-    }
+  const generateHash = (timestamp: number, jwt: string) => {
+    const hmac = crypto.createHmac("sha256", SECRET_KEY);
+    hmac.update(`${timestamp}:${jwt}`); // 🔐 Combina timestamp + JWT
+    return hmac.digest("hex"); // Retorna o hash
   };
 
-  if (loading) {
-    return <p className="text-yellow-400">Carregando...</p>;
-  }
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const now = Date.now();
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+    lastClickTimestamps.current = lastClickTimestamps.current.filter(
+      (timestamp) => now - timestamp <= 1000
+    );
+
+    if (lastClickTimestamps.current.length >= MAX_CLICKS_PER_SECOND) return;
+
+    lastClickTimestamps.current.push(now);
+    setPoints((prev) => prev + 1);
+    setClicks((prev) => prev + 1);
+    setClickEffect({ x: event.clientX, y: event.clientY });
+
+    if (clicks + 1 >= CLICKS_PER_REQUEST) {
+      sendClicks();
+    }
+
+    setTimeout(() => setClickEffect(null), 1000);
+  };
+
+  const sendClicks = async () => {
+    if (isSending) return;
+
+    try {
+      setIsSending(true);
+      const token = localStorage.getItem("jwt_token");
+      if (!token) throw new Error("Usuário não autenticado.");
+
+      const timestamp = Date.now(); // 🔥 Garante que cada request é única
+      const hash = generateHash(timestamp, token); // 🔐 Gera um hash seguro
+
+      const response = await fetch(`${API_BASE_URL}/click`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ timestamp, hash }), // 🔐 Envia timestamp + hash
+      });
+
+      if (!response.ok) throw new Error("Erro ao registrar clique.");
+
+      setClicks(0);
+    } catch (err) {
+      console.error("Erro ao enviar cliques:", err);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-4 relative">
