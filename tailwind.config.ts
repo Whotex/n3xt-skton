@@ -16,3 +16,17 @@ export default {
   },
   plugins: [],
 } satisfies Config;
+
+
+module.exports = {
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        primary: "#FFD700", // Ouro para representar moedas do clicker
+        secondary: "#1E293B", // Azul-escuro para fundos
+      },
+    },
+  },
+  plugins: [],
+};
