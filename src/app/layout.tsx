@@ -1,9 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { Press_Start_2P } from "next/font/google";
 import Link from "next/link";
 import { HomeIcon, ClipboardDocumentCheckIcon, TrophyIcon } from "@heroicons/react/24/outline";
-import "./globals.css"; // ✅ Correct way to include global styles in Next.js
+import "./globals.css";
 
 const API_URL = "https://sakaton.vercel.app/api";
 
@@ -41,7 +42,7 @@ declare global {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [telegramLoaded, setTelegramLoaded] = useState(false); // ✅ No unused variables
+  const [telegramLoaded, setTelegramLoaded] = useState(false);
 
   useEffect(() => {
     function loadTelegramSDK() {
@@ -67,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     async function authenticate() {
-      if (!telegramLoaded) return; // ✅ Ensures Telegram SDK is loaded first
+      if (!telegramLoaded) return;
 
       try {
         console.log("🔍 Checking `window.Telegram.WebApp`...", window.Telegram?.WebApp);
@@ -83,13 +84,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           throw new Error("🚨 Telegram WebApp did not provide initData.");
         }
 
-        const storedToken = localStorage.getItem("jwt_token");
-
-        if (storedToken) {
-          setLoading(false);
-          return;
-        }
-
         console.log("🔄 Authenticating...");
 
         const response = await fetch(`${API_URL}/authenticate`, {
@@ -101,7 +95,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         if (!response.ok) throw new Error("🚨 Authentication failed.");
 
         const data = await response.json();
-        localStorage.setItem("jwt_token", data.token);
+        localStorage.setItem("jwt_token", data.token); // ✅ Sempre salva o novo JWT
+
+        console.log("✅ New JWT stored:", data.token);
       } catch (err) {
         console.error("❌ Telegram Authentication Error:", err);
         setError("Authentication failed. Please try again.");
@@ -111,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     }
 
     authenticate();
-  }, [telegramLoaded]); // ✅ Ensures authentication only runs after Telegram SDK loads
+  }, [telegramLoaded]); // ✅ Agora sempre autentica ao abrir o app
 
   return (
     <html lang="en">
