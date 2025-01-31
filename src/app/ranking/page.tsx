@@ -2,15 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-} from "firebase/firestore";
-import { db } from "../lib/firebaseConfig";
+
+const API_BASE_URL = "https://sakaton.vercel.app/api"; // URL da API
 
 interface UserData {
   id: string;
@@ -18,79 +11,46 @@ interface UserData {
   points?: number;
 }
 
-// Se você precisar, pode ajustar a forma de receber o userId.
-// Aqui, faremos de exemplo fixo "test-user", mas você pode
-// usar Context/Auth para obter o ID real do usuário logado.
-const USER_ID = "test-user";
+const USER_ID = "test-user"; // 🔹 Trocar futuramente pelo ID real do usuário autenticado.
 
 export default function RankingPage() {
   const [topTen, setTopTen] = useState<UserData[]>([]);
-  const [myRank, setMyRank] = useState<number>(0);
-  const [myPoints, setMyPoints] = useState<number>(0);
+  const [myRank, setMyRank] = useState<number | null>(null);
+  const [myPoints, setMyPoints] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchRanking() {
       try {
-        // 1) Pegar pontos do usuário atual
-        const userRef = doc(db, "users", USER_ID);
-        const userSnap = await getDoc(userRef);
+        const response = await fetch(`${API_BASE_URL}/getRanking?user_id=${USER_ID}`);
+        if (!response.ok) throw new Error("Erro ao buscar ranking.");
+        
+        const data = await response.json();
 
-        let userPoints = 0;
-        if (userSnap.exists()) {
-          userPoints = userSnap.data().points || 0;
+        if (!data || !data.ranking) {
+          throw new Error("Ranking não encontrado.");
         }
-        setMyPoints(userPoints);
 
-        // 2) Buscar TODOS os usuários ordenados por points desc
-        const usersRef = collection(db, "users");
-        const rankingQuery = query(usersRef, orderBy("points", "desc"));
-        const allSnap = await getDocs(rankingQuery);
-
-        // 3) Calcular rank do usuário
-        //    Percorre cada doc e incrementa rank se tiver mais pontos que user
-        let rankCounter = 1;
-        const allDocs: UserData[] = [];
-        allSnap.forEach((docSnap) => {
-          const data = docSnap.data();
-          const userData: UserData = {
-            id: docSnap.id,
-            displayName: data.displayName,
-            points: data.points || 0,
-          };
-          allDocs.push(userData);
-        });
-        // Ordenar localmente (embora já esteja ordenado, mas p/ garantir).
-        allDocs.sort((a, b) => (b.points || 0) - (a.points || 0));
-
-        for (const docItem of allDocs) {
-          if ((docItem.points || 0) > userPoints) {
-            rankCounter++;
-          } else {
-            break;
-          }
-        }
-        setMyRank(rankCounter);
-
-        // 4) Pegar top 10
-        const topTenDocs = allDocs.slice(0, 10);
-        setTopTen(topTenDocs);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar ranking:", error);
+        // Atualiza os estados com os dados recebidos da API
+        setTopTen(data.ranking.slice(0, 10)); // Top 10 usuários
+        setMyRank(data.userRank ?? null);
+        setMyPoints(data.userPoints ?? null);
+      } catch (err) {
+        console.error("Erro ao buscar ranking:", err);
+        setError("Não foi possível carregar o ranking.");
+      } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchData();
+    fetchRanking();
   }, []);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen w-full px-4">
         <div className="flex flex-col items-center gap-4">
-          {/* Indicador de carregamento */}
           <div className="w-10 h-10 border-4 border-gray-300 border-t-4 border-t-yellow-400 rounded-full animate-spin"></div>
           <p className="text-xl text-yellow-300 animate-pulse text-center">
             Carregando ranking...
@@ -102,7 +62,19 @@ export default function RankingPage() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-start pt-8 pb-20 px-4">
-      {/* Título e Cartão de rank */}
+      {/* Mensagem de erro */}
+      {error && (
+        <motion.div
+          className="bg-red-500 text-white px-4 py-2 rounded-md text-center mb-4"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {error}
+        </motion.div>
+      )}
+
+      {/* Cartão de ranking do usuário */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -114,11 +86,11 @@ export default function RankingPage() {
         </h2>
         <p className="text-center text-lg font-semibold">
           Sua posição atual:{" "}
-          <span className="text-yellow-300 text-2xl">{myRank}º</span>
+          <span className="text-yellow-300 text-2xl">{myRank ?? "?"}º</span>
         </p>
         <p className="text-center">
           Seus pontos:{" "}
-          <span className="text-yellow-300 font-semibold">{myPoints}</span>
+          <span className="text-yellow-300 font-semibold">{myPoints ?? "?"}</span>
         </p>
       </motion.div>
 
@@ -147,7 +119,7 @@ export default function RankingPage() {
                 </div>
                 {/* Nome do usuário */}
                 <div className="flex-1 text-center">
-                  {user.displayName || user.id}
+                  {user.displayName || `Usuário ${index + 1}`}
                 </div>
                 {/* Pontos */}
                 <div className="w-16 text-right text-yellow-300 font-semibold">
