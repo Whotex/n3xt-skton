@@ -7,11 +7,10 @@ const API_BASE_URL = "https://sakaton.vercel.app/api"; // URL da API
 
 interface UserData {
   id: string;
-  displayName?: string;
-  points?: number;
+  first_name: string;
+  points: number;
+  rank: number;
 }
-
-const USER_ID = "test-user"; // 🔹 Trocar futuramente pelo ID real do usuário autenticado.
 
 export default function RankingPage() {
   const [topTen, setTopTen] = useState<UserData[]>([]);
@@ -23,19 +22,29 @@ export default function RankingPage() {
   useEffect(() => {
     async function fetchRanking() {
       try {
-        const response = await fetch(`${API_BASE_URL}/getRanking?user_id=${USER_ID}`);
+        const token = localStorage.getItem("jwt_token");
+        if (!token) throw new Error("Usuário não autenticado.");
+
+        const response = await fetch(`${API_BASE_URL}/getRanking`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`, // ✅ Enviando JWT
+            "Content-Type": "application/json",
+          },
+        });
+
         if (!response.ok) throw new Error("Erro ao buscar ranking.");
-        
+
         const data = await response.json();
 
-        if (!data || !data.ranking) {
+        if (!data || !data.top_10) {
           throw new Error("Ranking não encontrado.");
         }
 
         // Atualiza os estados com os dados recebidos da API
-        setTopTen(data.ranking.slice(0, 10)); // Top 10 usuários
-        setMyRank(data.userRank ?? null);
-        setMyPoints(data.userPoints ?? null);
+        setTopTen(data.top_10); // Top 10 usuários
+        setMyRank(data.user_rank?.rank ?? null);
+        setMyPoints(data.user_rank?.points ?? null);
       } catch (err) {
         console.error("Erro ao buscar ranking:", err);
         setError("Não foi possível carregar o ranking.");
@@ -108,18 +117,18 @@ export default function RankingPage() {
           <p className="text-center">Nenhum usuário encontrado.</p>
         ) : (
           <ul className="space-y-4">
-            {topTen.map((user, index) => (
+            {topTen.map((user) => (
               <li
                 key={user.id}
                 className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3"
               >
                 {/* Posição */}
                 <div className="w-8 text-center text-yellow-400 font-bold">
-                  {index + 1}
+                  {user.rank}
                 </div>
                 {/* Nome do usuário */}
                 <div className="flex-1 text-center">
-                  {user.displayName || `Usuário ${index + 1}`}
+                  {user.first_name || `Usuário ${user.rank}`}
                 </div>
                 {/* Pontos */}
                 <div className="w-16 text-right text-yellow-300 font-semibold">
