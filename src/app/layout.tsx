@@ -11,6 +11,31 @@ const pressStart2P = Press_Start_2P({
   subsets: ["latin"],
 });
 
+declare global {
+  interface TelegramWebApp {
+    initData?: string;
+    initDataUnsafe?: {
+      user?: {
+        id: number;
+        first_name?: string;
+        last_name?: string;
+        username?: string;
+        language_code?: string;
+      };
+      auth_date?: number;
+      hash?: string;
+    };
+    sendData?: (data: string) => void;
+    close?: () => void;
+  }
+
+  interface Window {
+    Telegram?: {
+      WebApp?: TelegramWebApp;
+    };
+  }
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,9 +52,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
-        if (!tg || !tg.initData) {
-          throw new Error("Erro: Dados do Telegram não carregados.");
+        console.log("Verificando `window.Telegram.WebApp`...", window.Telegram?.WebApp); // 🔍 Debug
+
+        if (typeof window === "undefined" || !window.Telegram?.WebApp) {
+          throw new Error("Telegram WebApp não está carregado corretamente.");
+        }
+
+        const tg = window.Telegram.WebApp;
+        console.log("Telegram WebApp Detectado:", tg);
+
+        if (!tg.initData || tg.initData === "") {
+          throw new Error("Telegram WebApp não forneceu initData.");
         }
 
         const response = await fetch(`${API_URL}/authenticate`, {
