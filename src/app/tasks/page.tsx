@@ -11,6 +11,7 @@ interface Task {
   points: number;
   link: string;
   completed: boolean;
+  started: boolean; // 🔹 Novo campo para saber se foi iniciada
 }
 
 export default function TasksPage() {
@@ -36,9 +37,15 @@ export default function TasksPage() {
 
         const data = await response.json();
         const status: { [key: string]: "claimable" | "idle" } = {};
-        
+
         data.tasks.forEach((task: Task) => {
-          status[task.id] = task.completed ? "claimable" : "idle";
+          if (task.completed) {
+            status[task.id] = "claimable"; // ✅ Já foi concluída, então deve ser exibida como feita
+          } else if (task.started) {
+            status[task.id] = "claimable"; // ✅ Se foi iniciada, exibe o botão de "Claim"
+          } else {
+            status[task.id] = "idle"; // 🔹 Caso contrário, pode ser iniciada
+          }
         });
 
         setTaskStatus(status);
@@ -80,7 +87,7 @@ export default function TasksPage() {
       }, 500);
 
       setTimeout(() => {
-        setTaskStatus((prev) => ({ ...prev, [taskId]: "claimable" }));
+        setTaskStatus((prev) => ({ ...prev, [taskId]: "claimable" })); // ✅ Agora pode dar claim
       }, 3000);
     } catch (_error) {
       console.error("Erro ao iniciar task:", _error);
@@ -167,15 +174,14 @@ export default function TasksPage() {
                       </button>
                     )}
 
-                    {taskStatus[task.id] !== "waiting" &&
-                      taskStatus[task.id] !== "claimable" && (
-                        <button
-                          className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg shadow-md transition-all"
-                          onClick={() => handleStartTask(task.id, task.link)}
-                        >
-                          Start 🚀
-                        </button>
-                      )}
+                    {taskStatus[task.id] === "idle" && (
+                      <button
+                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg shadow-md transition-all"
+                        onClick={() => handleStartTask(task.id, task.link)}
+                      >
+                        Start 🚀
+                      </button>
+                    )}
                   </>
                 )}
               </div>
