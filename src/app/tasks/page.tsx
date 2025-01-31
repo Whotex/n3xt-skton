@@ -10,15 +10,13 @@ interface Task {
   name: string;
   points: number;
   link: string;
-  completed: boolean;
-  started: boolean; // 🔹 Novo campo para saber se foi iniciada
+  status: "idle" | "claimable" | "completed"; // 🔹 Status já retornado pela API
 }
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [taskStatus, setTaskStatus] = useState<{ [key: string]: "idle" | "waiting" | "claimable" }>({});
 
   useEffect(() => {
     async function fetchTasks() {
@@ -36,19 +34,6 @@ export default function TasksPage() {
         if (!response.ok) throw new Error("Erro ao buscar as tasks.");
 
         const data = await response.json();
-        const status: { [key: string]: "claimable" | "idle" } = {};
-
-        data.tasks.forEach((task: Task) => {
-          if (task.completed) {
-            status[task.id] = "claimable"; // ✅ Já foi concluída, então deve ser exibida como feita
-          } else if (task.started) {
-            status[task.id] = "claimable"; // ✅ Se foi iniciada, exibe o botão de "Claim"
-          } else {
-            status[task.id] = "idle"; // 🔹 Caso contrário, pode ser iniciada
-          }
-        });
-
-        setTaskStatus(status);
         setTasks(data.tasks);
       } catch (_error) {
         console.error("Erro ao buscar as tasks:", _error);
@@ -63,7 +48,6 @@ export default function TasksPage() {
 
   const handleStartTask = async (taskId: string, link: string) => {
     try {
-      setTaskStatus((prev) => ({ ...prev, [taskId]: "waiting" }));
       const token = localStorage.getItem("jwt_token");
       if (!token) throw new Error("Usuário não autenticado.");
 
@@ -86,12 +70,13 @@ export default function TasksPage() {
         window.open(link, "_blank");
       }, 500);
 
-      setTimeout(() => {
-        setTaskStatus((prev) => ({ ...prev, [taskId]: "claimable" })); // ✅ Agora pode dar claim
-      }, 3000);
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId ? { ...task, status: "claimable" } : task
+        )
+      );
     } catch (_error) {
       console.error("Erro ao iniciar task:", _error);
-      setTaskStatus((prev) => ({ ...prev, [taskId]: "idle" }));
     }
   };
 
@@ -117,7 +102,7 @@ export default function TasksPage() {
 
       setTasks((prev) =>
         prev.map((task) =>
-          task.id === taskId ? { ...task, completed: true } : task
+          task.id === taskId ? { ...task, status: "completed" } : task
         )
       );
     } catch (_error) {
@@ -143,7 +128,7 @@ export default function TasksPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className={`p-4 rounded-lg shadow-md border-2 ${
-                task.completed
+                task.status === "completed"
                   ? "bg-gray-800 text-gray-500 border-gray-600"
                   : "bg-gray-900 border-yellow-400"
               }`}
@@ -152,37 +137,22 @@ export default function TasksPage() {
               <p className="text-gray-300">🎁 {task.points} pontos</p>
 
               <div className="mt-3 flex gap-2">
-                {task.completed ? (
+                {task.status === "completed" ? (
                   <span className="text-green-400 font-bold">✅ Concluído</span>
+                ) : task.status === "claimable" ? (
+                  <button
+                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-all"
+                    onClick={() => handleClaimTask(task.id)}
+                  >
+                    Claim 🎉
+                  </button>
                 ) : (
-                  <>
-                    {taskStatus[task.id] === "claimable" && (
-                      <button
-                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-all"
-                        onClick={() => handleClaimTask(task.id)}
-                      >
-                        Claim 🎉
-                      </button>
-                    )}
-
-                    {taskStatus[task.id] === "waiting" && (
-                      <button
-                        disabled
-                        className="px-4 py-2 bg-gray-600 text-white font-bold rounded-lg shadow-md transition-all cursor-not-allowed"
-                      >
-                        ⏳ Aguardando...
-                      </button>
-                    )}
-
-                    {taskStatus[task.id] === "idle" && (
-                      <button
-                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg shadow-md transition-all"
-                        onClick={() => handleStartTask(task.id, task.link)}
-                      >
-                        Start 🚀
-                      </button>
-                    )}
-                  </>
+                  <button
+                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg shadow-md transition-all"
+                    onClick={() => handleStartTask(task.id, task.link)}
+                  >
+                    Start 🚀
+                  </button>
                 )}
               </div>
             </motion.div>
