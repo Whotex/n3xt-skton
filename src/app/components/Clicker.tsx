@@ -16,14 +16,16 @@ interface ClickerProps {
 }
 
 export default function Clicker({ _userId, userPoints }: ClickerProps) {
-  const [points, setPoints] = useState(userPoints || 0);
+  const [points, setPoints] = useState<number>(userPoints ?? 0); // ✅ Garante que `userPoints` tenha valor inicial
   const [clickEffect, setClickEffect] = useState<{ x: number; y: number } | null>(null);
   const [clicks, setClicks] = useState<number>(0);
   const [isSending, setIsSending] = useState(false);
   const lastClickTimestamps = useRef<number[]>([]);
 
   useEffect(() => {
-    setPoints(userPoints || 0); // ✅ Atualiza os pontos com base no que foi recebido via prop
+    if (userPoints !== null) {
+      setPoints(userPoints); // ✅ Atualiza pontos corretamente sempre que `userPoints` mudar
+    }
   }, [userPoints]);
 
   const generateHash = (timestamp: number, jwt: string) => {

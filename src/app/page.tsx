@@ -135,8 +135,12 @@ export default function Home() {
 
       {/* 🎮 Área principal do Clicker */}
       <div className="z-10 flex flex-col items-center gap-6 px-4">
-        {userId ? <Clicker _userId={userId} userPoints={userPoints} /> : <p className="text-yellow-300">Carregando...</p>}
-      </div>
+  {userId && userPoints !== null ? (
+    <Clicker _userId={userId} userPoints={userPoints} />
+  ) : (
+    <p className="text-yellow-300">Carregando...</p>
+  )}
+</div>
     </section>
   );
 }
