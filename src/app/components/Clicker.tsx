@@ -28,13 +28,9 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
     }
   }, [userPoints]);
 
-  const generateHash = (timestamp: number, jwt: string, secretKey: string) => {
-    const hmac = crypto.createHmac("sha256", secretKey);
-    const hashBaseString = `${timestamp}:${jwt}`;
-
-    console.log(`📝 [FRONTEND] String base para hash: ${hashBaseString}`);
-
-    hmac.update(hashBaseString); // 🔐 Combina timestamp + JWT
+  const generateHash = (timestamp: number, jwt: string) => {
+    const hmac = crypto.createHmac("sha256", SECRET_KEY);
+    hmac.update(`${timestamp}:${jwt.replace("Bearer ", "")}`); // 🔐 Remove "Bearer " caso esteja presente
     return hmac.digest("hex"); // Retorna o hash
   };
 
@@ -70,10 +66,9 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
         token = token.replace("Bearer ", ""); // 🔥 Remove "Bearer " caso esteja presente
 
         const timestamp = Date.now(); // 🔥 Garante que cada request é única
-        const hash = generateHash(timestamp, token, SECRET_KEY); // 🔐 Gera um hash seguro
+        const hash = generateHash(timestamp, token); // 🔐 Gera um hash seguro
 
         console.log(`📌 [FRONTEND] Enviando Click -> Timestamp: ${timestamp}, Hash: ${hash}, JWT: ${token}`);
-        console.log(`🔎 [FRONTEND] SECRET_KEY: ${SECRET_KEY}`);
 
         const response = await fetch(`${API_BASE_URL}/click`, {
             method: "POST",
@@ -81,12 +76,7 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ 
-                timestamp, 
-                hash, 
-                jwt_token: token, // 🔥 Agora enviamos o JWT usado na geração do hash
-                secret_key: SECRET_KEY // ⚠️ TEMPORÁRIO: Remova isso depois que validar! 
-            }),
+            body: JSON.stringify({ timestamp, hash }), // 🔐 Envia timestamp + hash
         });
 
         if (!response.ok) throw new Error("Erro ao registrar clique.");
