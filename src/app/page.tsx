@@ -112,29 +112,6 @@ export default function Home() {
         </motion.div>
       )}
 
-{/* 🛠️ Sidebar flutuante na esquerda */}
-<motion.div
-  animate={{
-    x: sidebarOpen ? 0 : "calc(-100% + 2.5rem)",
-  }}
-  transition={{ duration: 0.3, ease: "easeOut" }}
-  className="fixed top-[66%] left-0 h-60 w-64 bg-gray-900/90 backdrop-blur-md 
-    border-r-4 border-yellow-400 shadow-lg rounded-r-lg p-4 z-40 flex flex-col"
->
-  <button
-    className="absolute top-1/2 -right-6 transform -translate-y-1/2
-      bg-yellow-400 text-black font-bold px-2 py-1 rounded-r shadow-md
-      hover:bg-yellow-500 transition"
-    onClick={() => setSidebarOpen(!sidebarOpen)}
-  >
-    {sidebarOpen ? "❮" : "❯"}
-  </button>
-
-  <h2 className="text-yellow-400 text-xl tracking-widest">📢 INFO</h2>
-  <p className="text-gray-300 text-sm mt-2">
-    Esta seção pode ser usada para carregar dados de uma API no futuro.
-  </p>
-</motion.div>
 
       {/* Caixa de Dados do Usuário - Centralizada no topo */}
       {userId && userPoints !== null && firstName && (
