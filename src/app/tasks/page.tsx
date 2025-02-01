@@ -111,44 +111,44 @@ export default function TasksPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-12 pb-20 px-4 bg-gray-900 text-white">
-      <h1 className="text-3xl font-bold text-yellow-400 mb-6 tracking-widest">🎯 Missões</h1>
+    <section className="min-h-screen flex flex-col items-center justify-start pt-6 pb-8 px-3 bg-gray-900 text-white">
+      <h1 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wider">🎯 Missões</h1>
 
-      {loading && <p className="text-gray-300 animate-pulse">Carregando...</p>}
-      {error && <p className="text-red-400">{error}</p>}
+      {loading && <p className="text-gray-300 text-sm animate-pulse">Carregando...</p>}
+      {error && <p className="text-red-400 text-sm">{error}</p>}
 
-      <div className="w-full max-w-2xl space-y-4">
+      <div className="w-full max-w-2xl space-y-3">
         {tasks.length === 0 ? (
-          <p className="text-center text-gray-400">Não há missões disponíveis no momento.</p>
+          <p className="text-center text-gray-400 text-sm">Não há missões disponíveis no momento.</p>
         ) : (
           tasks.map((task) => (
             <motion.div
               key={task.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`p-4 rounded-lg shadow-md border-2 ${
+              className={`p-3 rounded-lg shadow-sm border-2 ${
                 task.status === "completed"
                   ? "bg-gray-800 text-gray-500 border-gray-600"
                   : "bg-gray-900 border-yellow-400"
               }`}
             >
-              <h3 className="text-xl font-semibold">{task.name}</h3>
-              <p className="text-gray-300">🎁 {task.points} pontos</p>
+              <h3 className="text-lg font-medium">{task.name}</h3>
+              <p className="text-gray-300 text-sm">🎁 {task.points} pontos</p>
 
-              <div className="mt-3 flex gap-2">
+              <div className="mt-2 flex gap-2">
                 {task.status === "completed" ? (
-                  <span className="text-green-400 font-bold">✅ Concluído</span>
+                  <span className="text-green-400 font-bold text-sm">✅ Concluído</span>
                 ) : task.status === "claimable" ? (
                   <button
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-all"
+                    className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white font-bold rounded shadow-sm transition-all text-sm"
                     onClick={() => handleClaimTask(task.id)}
                   >
                     Claim 🎉
                   </button>
                 ) : (
                   <button
-                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg shadow-md transition-all"
+                    className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded shadow-sm transition-all text-sm"
                     onClick={() => handleStartTask(task.id, task.link)}
                   >
                     Start 🚀
