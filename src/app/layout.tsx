@@ -1,4 +1,3 @@
-// layout.tsx
 "use client";
 
 import "./globals.css";
@@ -6,6 +5,7 @@ import { Press_Start_2P } from "next/font/google";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
 import TopNavigation from "./components/TopNavigation";
 import BottomNavigation from "./components/BottomNavigation";
+import LoadingScreen from "./components/LoadingScreen";  // Importação do novo componente
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -20,9 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
       <html lang="en">
         <body className={`${pressStart2P.className} bg-gray-900 text-white antialiased relative min-h-screen`}>
-          <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-yellow-400">
-            <p className="text-lg">🔄 Loading...</p>
-          </div>
+          <LoadingScreen />
         </body>
       </html>
     );
