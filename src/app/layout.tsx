@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Press_Start_2P } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import { HomeIcon, ClipboardDocumentCheckIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
 import "./globals.css";
 
 const API_URL = "https://sakaton.vercel.app/api";
@@ -130,14 +132,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : (
           <>
             {/* Top Navigation */}
-            <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-3 z-50 flex items-center justify-center">
-              <h1 className="absolute left-1/2 transform -translate-x-1/2 text-base sm:text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 tracking-widest">
-                SakaTON
-              </h1>
+            <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-4 z-50 flex items-center justify-center">
+              <motion.div
+                initial={{ y: 0 }}
+                animate={{ y: [0, -5, 0] }} // 🟢 Leve efeito de flutuação
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-1/2 transform -translate-x-1/2"
+              >
+                <Image
+                  src="/SAKATON.png"
+                  alt="SakaTON Logo"
+                  width={200}
+                  height={60}
+                  priority
+                  className="drop-shadow-lg"
+                />
+              </motion.div>
             </nav>
 
             {/* Main Content */}
-            <main className="pt-16 pb-16">{children}</main>
+            <main className="pt-20 pb-16">{children}</main>
 
             {/* Bottom Navigation */}
             <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 p-3">
