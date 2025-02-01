@@ -5,7 +5,7 @@ import { Press_Start_2P } from "next/font/google";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
 import TopNavigation from "./components/TopNavigation";
 import BottomNavigation from "./components/BottomNavigation";
-import LoadingScreen from "./components/LoadingScreen";  // Importação do novo componente
+import LoadingScreen from "./components/LoadingScreen";  // Componente de loading
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -15,7 +15,6 @@ const pressStart2P = Press_Start_2P({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { loading, error } = useTelegramAuth();
 
-  // Exibe uma tela de loading enquanto a autenticação ocorre
   if (loading) {
     return (
       <html lang="en">
@@ -26,7 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Em caso de erro, mostra uma mensagem e permite tentar novamente
   if (error) {
     return (
       <html lang="en">
@@ -45,7 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Renderiza o layout principal, incluindo as barras de navegação e o conteúdo da página
   return (
     <html lang="en">
       <body className={`${pressStart2P.className} bg-gray-900 text-white antialiased relative min-h-screen`}>

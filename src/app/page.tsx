@@ -8,12 +8,10 @@ const API_BASE_URL = "https://sakaton.vercel.app/api";
 
 export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState<string | null>(null);
   const [userPoints, setUserPoints] = useState<number | null>(null);
-  const [referallCount, setReferallCount] = useState<number>(0);
-  const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -21,26 +19,25 @@ export default function Home() {
         const token = localStorage.getItem("jwt_token");
         if (!token) throw new Error("Usuário não autenticado.");
 
-        // Chamada para o endpoint /getUser
-        const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!responseUser.ok) throw new Error("Erro ao buscar dados do usuário.");
-        const dataUser = await responseUser.json();
-        // Assume-se que a resposta tenha o formato: { user: { id, first_name, referall_count, points? } }
-        setUserId(dataUser.user.id);
-        setFirstName(dataUser.user.first_name || "User");
-        setReferallCount(dataUser.user.referall_count || 0);
-
-        // Chamada para o endpoint /getPoints para garantir que os pontos estejam atualizados
+        // Chamada para o endpoint /getPoints
         const responsePoints = await fetch(`${API_BASE_URL}/getPoints`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!responsePoints.ok) throw new Error("Erro ao buscar pontuação.");
+        if (!responsePoints.ok)
+          throw new Error("Erro ao buscar pontuação.");
         const dataPoints = await responsePoints.json();
         setUserPoints(dataPoints.points || 0);
+
+        // Chamada para o endpoint /getUser para pegar o user_id (a caixa de dados do TopNavigation já pega os outros dados)
+        const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!responseUser.ok)
+          throw new Error("Erro ao buscar dados do usuário.");
+        const dataUser = await responseUser.json();
+        setUserId(dataUser.user.id);
       } catch (err) {
         console.error("Erro ao carregar dados do usuário:", err);
         setError("Erro ao buscar dados do usuário.");
@@ -83,7 +80,7 @@ export default function Home() {
   }
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-purple-900 via-black to-gray-900 overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-purple-900 via-black to-gray-900 overflow-hidden pt-28">
       {/* Gradiente de fundo */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-b from-transparent to-black pointer-events-none"
@@ -120,42 +117,8 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* Caixa de Dados do Usuário - Centralizada no topo */}
-      {userId && firstName && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md rounded-lg shadow-xl border-4 border-yellow-400 p-4 mb-6"
-          style={{
-            backgroundImage: "url('/wood-texture.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <h2
-            className="text-2xl font-bold text-center text-white"
-            style={{ WebkitTextStroke: "1px black" }}
-          >
-            Welcome, {firstName}!
-          </h2>
-          <p
-            className="mt-2 text-center text-white text-sm"
-            style={{ WebkitTextStroke: "1px black" }}
-          >
-            Points: {userPoints !== null ? userPoints : 0}
-          </p>
-          <p
-            className="mt-1 text-center text-white text-xs"
-            style={{ WebkitTextStroke: "1px black" }}
-          >
-            Invited: {referallCount}
-          </p>
-        </motion.div>
-      )}
-
-      {/* Área principal do Clicker */}
-      <div className="z-10 flex flex-col items-center gap-6 px-4">
+      {/* 🎮 Área principal do Clicker */}
+      <div className="z-10 flex flex-col items-center gap-6 px-4 pt-4">
         {userId && userPoints !== null ? (
           <Clicker _userId={userId} userPoints={userPoints} />
         ) : (
