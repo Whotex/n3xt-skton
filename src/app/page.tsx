@@ -10,6 +10,7 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [userPoints, setUserPoints] = useState<number | null>(null);
+  const [referallCount, setReferallCount] = useState<number>(0);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,18 +21,26 @@ export default function Home() {
         const token = localStorage.getItem("jwt_token");
         if (!token) throw new Error("Usuário não autenticado.");
 
-        const response = await fetch(`${API_BASE_URL}/getPoints`, {
+        // Chamando o endpoint /getUser para obter first_name e referall_count
+        const response = await fetch(`${API_BASE_URL}/getUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) throw new Error("Erro ao buscar pontuação.");
+        if (!response.ok) throw new Error("Erro ao buscar dados do usuário.");
 
         const data = await response.json();
-        setUserPoints(data.points || 0);
-        setUserId(data.user_id);
-        // Considerando que a API também retorne o first_name:
-        setFirstName(data.first_name || "Usuário");
+        // Espera-se que a resposta esteja no formato: { user: { id, first_name, referall_count } }
+        setUserId(data.user.id);
+        setFirstName(data.user.first_name || "User");
+        setReferallCount(data.user.referall_count || 0);
+
+        // Se desejar continuar mostrando a pontuação (caso ela não seja fornecida por /getUser),
+        // você pode manter uma chamada adicional ou ajustar o endpoint para retornar também points.
+        // Aqui, vamos assumir que o endpoint /getUser também retorna a pontuação:
+        if (data.user.points !== undefined) {
+          setUserPoints(data.user.points);
+        }
       } catch (err) {
         console.error("Erro ao carregar dados do usuário:", err);
         setError("Erro ao buscar dados do usuário.");
@@ -111,9 +120,8 @@ export default function Home() {
         </motion.div>
       )}
 
-
       {/* Caixa de Dados do Usuário - Centralizada no topo */}
-      {userId && userPoints !== null && firstName && (
+      {userId && firstName && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -129,13 +137,19 @@ export default function Home() {
             className="text-2xl font-bold text-center text-white"
             style={{ WebkitTextStroke: "1px black" }}
           >
-            Bem-vindo, {firstName}!
+            Welcome, {firstName}!
           </h2>
           <p
-            className="mt-2 text-center text-white"
+            className="mt-2 text-center text-white text-sm"
             style={{ WebkitTextStroke: "1px black" }}
           >
-            Pontos: {userPoints}
+            Points: {userPoints !== null ? userPoints : 0}
+          </p>
+          <p
+            className="mt-1 text-center text-white text-xs"
+            style={{ WebkitTextStroke: "1px black" }}
+          >
+            Invited: {referallCount}
           </p>
         </motion.div>
       )}
