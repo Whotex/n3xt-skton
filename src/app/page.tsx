@@ -29,7 +29,7 @@ export default function Home() {
 
         const data = await response.json();
         setUserPoints(data.points || 0);
-        setUserId(data.user_id); // Garante que o ID seja atualizado corretamente
+        setUserId(data.user_id);
       } catch (err) {
         console.error("Erro ao carregar dados do usuário:", err);
         setError("Erro ao buscar dados do usuário.");
@@ -133,14 +133,33 @@ export default function Home() {
         </p>
       </motion.div>
 
+      {/* Caixa de Dados do Usuário - Centralizada no topo */}
+      {userId && userPoints !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md rounded-lg shadow-xl border-4 border-yellow-400 p-4 mb-6"
+          style={{
+            backgroundImage: "url('/wood-texture.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <h2 className="text-2xl font-bold text-center text-black">Bem-vindo!</h2>
+          <p className="mt-2 text-center text-black">ID: {userId}</p>
+          <p className="mt-1 text-center text-black">Pontos: {userPoints}</p>
+        </motion.div>
+      )}
+
       {/* 🎮 Área principal do Clicker */}
       <div className="z-10 flex flex-col items-center gap-6 px-4">
-  {userId && userPoints !== null ? (
-    <Clicker _userId={userId} userPoints={userPoints} />
-  ) : (
-    <p className="text-yellow-300">Carregando...</p>
-  )}
-</div>
+        {userId && userPoints !== null ? (
+          <Clicker _userId={userId} userPoints={userPoints} />
+        ) : (
+          <p className="text-yellow-300">Carregando...</p>
+        )}
+      </div>
     </section>
   );
 }
