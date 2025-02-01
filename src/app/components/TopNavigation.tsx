@@ -6,12 +6,11 @@ import { motion } from "framer-motion";
 
 export default function TopNavigation() {
   return (
-    <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-5 z-50 flex items-center justify-center">
+    <nav className="fixed top-0 left-0 w-full h-24 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 border-b border-gray-700 z-50 flex items-center justify-center shadow-2xl">
       <motion.div
         initial={{ y: 5 }}
-        animate={{ y: [5, -5, 5] }} // Efeito de flutuação
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute left-1/2 transform -translate-x-1/2 translate-y-2"
+        animate={{ y: [5, 10, 5] }} // Animação sutil: a logo flutua entre 5px e 10px abaixo
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
         <Image
           src="/SAKATON.png"
@@ -19,7 +18,7 @@ export default function TopNavigation() {
           width={180}
           height={54}
           priority
-          className="drop-shadow-lg"
+          className="drop-shadow-2xl"
         />
       </motion.div>
     </nav>
