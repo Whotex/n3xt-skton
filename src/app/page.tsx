@@ -8,6 +8,7 @@ const API_BASE_URL = "https://sakaton.vercel.app/api";
 
 export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [userPoints, setUserPoints] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +31,8 @@ export default function Home() {
         const data = await response.json();
         setUserPoints(data.points || 0);
         setUserId(data.user_id);
+        // Considerando que a API também retorne o first_name:
+        setFirstName(data.first_name || "Usuário");
       } catch (err) {
         console.error("Erro ao carregar dados do usuário:", err);
         setError("Erro ao buscar dados do usuário.");
@@ -109,32 +112,32 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* 🛠️ Sidebar flutuante na esquerda */}
-      <motion.div
-        animate={{
-          x: sidebarOpen ? 0 : "-90%",
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="fixed top-1/4 left-0 h-60 w-64 bg-gray-900/90 backdrop-blur-md 
-          border-r-4 border-yellow-400 shadow-lg rounded-r-lg p-4 z-40 flex flex-col"
-      >
-        <button
-          className="absolute top-1/2 -right-6 transform -translate-y-1/2
-            bg-yellow-400 text-black font-bold px-2 py-1 rounded-r shadow-md
-            hover:bg-yellow-500 transition"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? "❮" : "❯"}
-        </button>
+{/* 🛠️ Sidebar flutuante na esquerda */}
+<motion.div
+  animate={{
+    x: sidebarOpen ? 0 : "calc(-100% + 2.5rem)",
+  }}
+  transition={{ duration: 0.3, ease: "easeOut" }}
+  className="fixed top-[66%] left-0 h-60 w-64 bg-gray-900/90 backdrop-blur-md 
+    border-r-4 border-yellow-400 shadow-lg rounded-r-lg p-4 z-40 flex flex-col"
+>
+  <button
+    className="absolute top-1/2 -right-6 transform -translate-y-1/2
+      bg-yellow-400 text-black font-bold px-2 py-1 rounded-r shadow-md
+      hover:bg-yellow-500 transition"
+    onClick={() => setSidebarOpen(!sidebarOpen)}
+  >
+    {sidebarOpen ? "❮" : "❯"}
+  </button>
 
-        <h2 className="text-yellow-400 text-xl tracking-widest">📢 INFO</h2>
-        <p className="text-gray-300 text-sm mt-2">
-          Esta seção pode ser usada para carregar dados de uma API no futuro.
-        </p>
-      </motion.div>
+  <h2 className="text-yellow-400 text-xl tracking-widest">📢 INFO</h2>
+  <p className="text-gray-300 text-sm mt-2">
+    Esta seção pode ser usada para carregar dados de uma API no futuro.
+  </p>
+</motion.div>
 
       {/* Caixa de Dados do Usuário - Centralizada no topo */}
-      {userId && userPoints !== null && (
+      {userId && userPoints !== null && firstName && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,9 +149,18 @@ export default function Home() {
             backgroundPosition: "center",
           }}
         >
-          <h2 className="text-2xl font-bold text-center text-black">Bem-vindo!</h2>
-          <p className="mt-2 text-center text-black">ID: {userId}</p>
-          <p className="mt-1 text-center text-black">Pontos: {userPoints}</p>
+          <h2
+            className="text-2xl font-bold text-center text-white"
+            style={{ WebkitTextStroke: "1px black" }}
+          >
+            Bem-vindo, {firstName}!
+          </h2>
+          <p
+            className="mt-2 text-center text-white"
+            style={{ WebkitTextStroke: "1px black" }}
+          >
+            Pontos: {userPoints}
+          </p>
         </motion.div>
       )}
 
