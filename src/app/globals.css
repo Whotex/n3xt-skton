@@ -6,8 +6,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #fbbf24;   /* Exemplo: amarelo para destaque */
-  --secondary: #1f2937; /* Exemplo: cinza escuro */
+  --primary: #fbbf24;   /* Amarelo para destaque */
+  --secondary: #1f2937; /* Cinza escuro */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,10 +31,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   
-  /* Fundo com imagem repetida e fallback na cor */
+  /* Configuração do background com GIF */
   background-color: var(--background);
-  background-image: url('/background.png');
-  background-repeat: repeat;
-  background-size: auto;
+  background-image: url('/background.gif');
+  background-repeat: no-repeat;
+  background-size: cover;
   background-attachment: fixed;
+  background-position: center;
 }
