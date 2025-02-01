@@ -11,7 +11,6 @@ export default function Home() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [userPoints, setUserPoints] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
