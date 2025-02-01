@@ -21,26 +21,26 @@ export default function Home() {
         const token = localStorage.getItem("jwt_token");
         if (!token) throw new Error("Usuário não autenticado.");
 
-        // Chamando o endpoint /getUser para obter first_name e referall_count
-        const response = await fetch(`${API_BASE_URL}/getUser`, {
+        // Chamada para o endpoint /getUser
+        const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!responseUser.ok) throw new Error("Erro ao buscar dados do usuário.");
+        const dataUser = await responseUser.json();
+        // Assume-se que a resposta tenha o formato: { user: { id, first_name, referall_count, points? } }
+        setUserId(dataUser.user.id);
+        setFirstName(dataUser.user.first_name || "User");
+        setReferallCount(dataUser.user.referall_count || 0);
 
-        if (!response.ok) throw new Error("Erro ao buscar dados do usuário.");
-
-        const data = await response.json();
-        // Espera-se que a resposta esteja no formato: { user: { id, first_name, referall_count } }
-        setUserId(data.user.id);
-        setFirstName(data.user.first_name || "User");
-        setReferallCount(data.user.referall_count || 0);
-
-        // Se desejar continuar mostrando a pontuação (caso ela não seja fornecida por /getUser),
-        // você pode manter uma chamada adicional ou ajustar o endpoint para retornar também points.
-        // Aqui, vamos assumir que o endpoint /getUser também retorna a pontuação:
-        if (data.user.points !== undefined) {
-          setUserPoints(data.user.points);
-        }
+        // Chamada para o endpoint /getPoints para garantir que os pontos estejam atualizados
+        const responsePoints = await fetch(`${API_BASE_URL}/getPoints`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!responsePoints.ok) throw new Error("Erro ao buscar pontuação.");
+        const dataPoints = await responsePoints.json();
+        setUserPoints(dataPoints.points || 0);
       } catch (err) {
         console.error("Erro ao carregar dados do usuário:", err);
         setError("Erro ao buscar dados do usuário.");
@@ -154,7 +154,7 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* 🎮 Área principal do Clicker */}
+      {/* Área principal do Clicker */}
       <div className="z-10 flex flex-col items-center gap-6 px-4">
         {userId && userPoints !== null ? (
           <Clicker _userId={userId} userPoints={userPoints} />
