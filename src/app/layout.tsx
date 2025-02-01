@@ -132,18 +132,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : (
           <>
             {/* Top Navigation */}
-            <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-4 z-50 flex items-center justify-center">
+            <nav className="fixed top-0 left-0 w-full bg-gray-800 border-b border-gray-700 px-4 py-5 z-50 flex items-center justify-center">
               <motion.div
-                initial={{ y: 0 }}
-                animate={{ y: [0, -5, 0] }} // 🟢 Leve efeito de flutuação
+                initial={{ y: 5 }}
+                animate={{ y: [5, -5, 5] }} // 🟢 Mantém efeito de flutuação
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-1/2 transform -translate-x-1/2"
+                className="absolute left-1/2 transform -translate-x-1/2 translate-y-2"
               >
                 <Image
                   src="/SAKATON.png"
                   alt="SakaTON Logo"
-                  width={200}
-                  height={60}
+                  width={180} // 🔹 Reduzi em 10% o tamanho
+                  height={54}
                   priority
                   className="drop-shadow-lg"
                 />
@@ -151,7 +151,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
 
             {/* Main Content */}
-            <main className="pt-20 pb-16">{children}</main>
+            <main className="pt-24 pb-16">{children}</main>
 
             {/* Bottom Navigation */}
             <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 p-3">
