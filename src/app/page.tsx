@@ -24,18 +24,16 @@ export default function Home() {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!responsePoints.ok)
-          throw new Error("Erro ao buscar pontuação.");
+        if (!responsePoints.ok) throw new Error("Erro ao buscar pontuação.");
         const dataPoints = await responsePoints.json();
         setUserPoints(dataPoints.points || 0);
 
-        // Chamada para o endpoint /getUser para pegar o user_id (a caixa de dados do TopNavigation já pega os outros dados)
+        // Chamada para o endpoint /getUser para pegar o user_id
         const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!responseUser.ok)
-          throw new Error("Erro ao buscar dados do usuário.");
+        if (!responseUser.ok) throw new Error("Erro ao buscar dados do usuário.");
         const dataUser = await responseUser.json();
         setUserId(dataUser.user.id);
       } catch (err) {
@@ -80,14 +78,8 @@ export default function Home() {
   }
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-purple-900 via-black to-gray-900 overflow-hidden pt-28">
-      {/* Gradiente de fundo */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-transparent to-black pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
-        transition={{ duration: 1 }}
-      />
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-28">
+      {/* Removido o gradiente de fundo para deixar o background global aparecer */}
 
       {/* 🏆 Janela flutuante (exibe apenas na primeira vez) */}
       {showPopup && (

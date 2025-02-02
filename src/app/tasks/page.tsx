@@ -10,7 +10,7 @@ interface Task {
   name: string;
   points: number;
   link: string;
-  status: "idle" | "claimable" | "completed"; // 🔹 Status já retornado pela API
+  status: "idle" | "claimable" | "completed"; // Status já retornado pela API
 }
 
 export default function TasksPage() {
@@ -26,7 +26,7 @@ export default function TasksPage() {
 
         const response = await fetch(`${API_BASE_URL}/tasks`, {
           headers: {
-            "Authorization": `Bearer ${token}`, // ✅ Enviando JWT
+            "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
@@ -54,7 +54,7 @@ export default function TasksPage() {
       const response = await fetch(`${API_BASE_URL}/start-task`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`, // ✅ Enviando JWT
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ task_id: taskId }),
@@ -88,7 +88,7 @@ export default function TasksPage() {
       const response = await fetch(`${API_BASE_URL}/claim-task`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`, // ✅ Enviando JWT
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ task_id: taskId }),
@@ -111,7 +111,7 @@ export default function TasksPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-6 pb-8 px-3 bg-gray-900 text-white">
+    <section className="min-h-screen flex flex-col items-center justify-start pt-6 pb-8 px-3 text-white">
       <h1 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wider">🎯 Missões</h1>
 
       {loading && <p className="text-gray-300 text-sm animate-pulse">Carregando...</p>}
