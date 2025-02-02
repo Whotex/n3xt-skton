@@ -17,13 +17,11 @@ export default function TopNavigation() {
         const token = localStorage.getItem("jwt_token");
         if (!token) throw new Error("Usuário não autenticado.");
         
-        // Chamada para o endpoint /getUser
         const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!responseUser.ok)
-          throw new Error("Erro ao buscar dados do usuário.");
+        if (!responseUser.ok) throw new Error("Erro ao buscar dados do usuário.");
         const dataUser = await responseUser.json();
         setFirstName(dataUser.user.first_name || "Player");
         setReferallCount(dataUser.user.referall_count || 0);
@@ -37,19 +35,18 @@ export default function TopNavigation() {
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 flex justify-center">
-      <div className="w-full max-w-7xl bg-black bg-opacity-50 rounded-xl shadow-md flex items-center justify-between px-6 py-2">
-        {/* Área esquerda: Novo LOGO do jogo (maior) */}
-        <div className="flex items-center mr-4">
+      <div className="w-full max-w-7xl bg-black bg-opacity-50 rounded-xl shadow-md flex items-center justify-between px-6 py-2 h-24">
+        {/* Área esquerda: Novo LOGO do jogo */}
+        <div className="flex items-center">
           <Image
             src="/LOGO.png"
             alt="SakaTON Logo"
-            width={120}  // Logo maior
-            height={120}
+            width={150}
+            height={150}
             priority
-            className="object-contain drop-shadow-lg"
+            className="object-contain drop-shadow-xl ml-4 -mt-3"
           />
         </div>
-
         {/* Área direita: Caixa com os dados do usuário */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
