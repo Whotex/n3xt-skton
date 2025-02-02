@@ -140,7 +140,7 @@ export default function TasksPage() {
       type="text"
       readOnly
       value={`https://t.me/yamiwolfbot/sakaton?start=${refCode || ""}`}
-      className="flex-1 p-2 bg-gray-900 text-white border border-gray-600 rounded-l focus:outline-none truncate whitespace-nowrap overflow-hidden"
+      className="flex-1 min-w-0 p-2 bg-gray-900 text-white border border-gray-600 rounded-l focus:outline-none truncate whitespace-nowrap overflow-hidden"
     />
     <button
       onClick={() => {
@@ -153,6 +153,7 @@ export default function TasksPage() {
   </div>
   <p className="mt-2 text-sm text-gray-300">1 ref = 1000 points</p>
 </div>
+
 
       {/* Seção Available Tasks */}
       <div className="w-full max-w-2xl mb-6">
