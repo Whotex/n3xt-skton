@@ -18,7 +18,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Estados para dados do usuário
+  // Estado para dados do usuário (para a caixa de convite)
   const [refCode, setRefCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function TasksPage() {
         const data = await response.json();
         setTasks(data.tasks);
 
-        // Busca os dados do usuário para obter o ref_code e user_id
+        // Busca os dados do usuário para obter o ref_code
         const responseUser = await fetch(`${API_BASE_URL}/getUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -123,10 +123,14 @@ export default function TasksPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen w-full">
-        <p className="text-gray-300 text-sm animate-pulse">Carregando...</p>
+        <p className="text-gray-300 text-sm animate-pulse">Loading...</p>
       </div>
     );
   }
+
+  // Filtra tarefas disponíveis (status idle ou claimable) e tarefas concluídas
+  const availableTasks = tasks.filter(task => task.status !== "completed");
+  const completedTasks = tasks.filter(task => task.status === "completed");
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-start pt-6 pb-8 px-3 text-white">
@@ -152,16 +156,17 @@ export default function TasksPage() {
         <p className="mt-2 text-sm text-gray-300">1 ref = 1000 points</p>
       </div>
 
-      <h1 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wider">🎯 Missões</h1>
-
-      {loading && <p className="text-gray-300 text-sm animate-pulse">Carregando...</p>}
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-
-      <div className="w-full max-w-2xl space-y-3">
-        {tasks.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm">Não há missões disponíveis no momento.</p>
+      {/* Seção Available Tasks */}
+      <div className="w-full max-w-2xl mb-6">
+        <h1 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wider">Available Tasks</h1>
+        {availableTasks.length === 0 ? (
+          <div className="p-4 bg-gray-800/80 rounded-lg shadow-lg">
+            <p className="text-center text-gray-300 text-sm">
+              There are no available tasks at the moment.
+            </p>
+          </div>
         ) : (
-          tasks.map((task) => (
+          availableTasks.map((task) => (
             <motion.div
               key={task.id}
               initial={{ opacity: 0, y: 5 }}
@@ -174,11 +179,9 @@ export default function TasksPage() {
               }`}
             >
               <h3 className="text-lg font-medium">{task.name}</h3>
-              <p className="text-gray-300 text-sm">🎁 {task.points} pontos</p>
+              <p className="text-gray-300 text-sm">🎁 {task.points} points</p>
               <div className="mt-2 flex gap-2">
-                {task.status === "completed" ? (
-                  <span className="text-green-400 font-bold text-sm">✅ Concluído</span>
-                ) : task.status === "claimable" ? (
+                {task.status === "claimable" ? (
                   <button
                     className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white font-bold rounded shadow-sm transition-all text-sm"
                     onClick={() => handleClaimTask(task.id)}
@@ -198,6 +201,28 @@ export default function TasksPage() {
           ))
         )}
       </div>
+
+      {/* Seção Completed Tasks */}
+      {completedTasks.length > 0 && (
+        <div className="w-full max-w-2xl mt-8">
+          <h1 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wider">Completed Tasks</h1>
+          {completedTasks.map((task) => (
+            <motion.div
+              key={task.id}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-3 rounded-lg shadow-sm border-2 bg-gray-800 text-gray-500 border-gray-600"
+            >
+              <h3 className="text-lg font-medium">{task.name}</h3>
+              <p className="text-gray-300 text-sm">🎁 {task.points} Points</p>
+              <div className="mt-2 flex gap-2">
+                <span className="text-green-400 font-bold text-sm">✅ Done </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
