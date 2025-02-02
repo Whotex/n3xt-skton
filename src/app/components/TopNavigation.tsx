@@ -36,52 +36,47 @@ export default function TopNavigation() {
   }, []);
 
   return (
-    <nav
-      className="fixed top-0 left-0 w-full h-24 z-50 flex items-center justify-between px-6 shadow-md"
-      style={{
-        backgroundImage: "url('/wood-texture.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Área esquerda: Título/Logo do jogo */}
-      <div className="flex items-center">
-        <Image
-          src="/SAKATON.png"
-          alt="SakaTON Logo"
-          width={180}
-          height={54}
-          priority
-          className="drop-shadow-lg"
-        />
-      </div>
+    <nav className="fixed top-0 left-0 w-full z-50 flex justify-center">
+      <div className="w-full max-w-7xl bg-black bg-opacity-50 rounded-xl shadow-md flex items-center justify-between px-6 py-2">
+        {/* Área esquerda: Novo LOGO do jogo */}
+        <div className="flex items-center">
+          <Image
+            src="/LOGO.png"
+            alt="SakaTON Logo"
+            width={80}  // Ajuste conforme necessário para um bom visual
+            height={80}
+            priority
+            className="object-contain drop-shadow-lg"
+          />
+        </div>
 
-      {/* Área direita: Caixa com os dados do jogador */}
-      <motion.div
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-black bg-opacity-75 p-3 rounded-xl shadow-lg"
-      >
-        {error ? (
-          <p className="text-xs text-white">Error loading data</p>
-        ) : (
-          <>
-            <p
-              className="text-sm font-semibold text-white"
-              style={{ WebkitTextStroke: "1px black" }}
-            >
-              {firstName}
-            </p>
-            <p
-              className="text-xs text-white mt-1"
-              style={{ WebkitTextStroke: "1px black" }}
-            >
-              Ref: {referallCount}
-            </p>
-          </>
-        )}
-      </motion.div>
+        {/* Área direita: Caixa com os dados do usuário */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-black bg-opacity-75 p-3 rounded-xl shadow-lg"
+        >
+          {error ? (
+            <p className="text-xs text-white">Error loading data</p>
+          ) : (
+            <>
+              <p
+                className="text-sm font-semibold text-white"
+                style={{ WebkitTextStroke: "1px black" }}
+              >
+                {firstName}
+              </p>
+              <p
+                className="text-xs text-white mt-1"
+                style={{ WebkitTextStroke: "1px black" }}
+              >
+                Ref: {referallCount}
+              </p>
+            </>
+          )}
+        </motion.div>
+      </div>
     </nav>
   );
 }
