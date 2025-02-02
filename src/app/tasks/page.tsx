@@ -16,7 +16,6 @@ interface Task {
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   
   // Estado para dados do usuário (para a caixa de convite)
   const [refCode, setRefCode] = useState<string | null>(null);
@@ -48,7 +47,6 @@ export default function TasksPage() {
         setRefCode(dataUser.user.ref_code || "");
       } catch (_error) {
         console.error("Erro ao buscar as tasks:", _error);
-        setError("Não existem missões no momento.");
       } finally {
         setLoading(false);
       }
