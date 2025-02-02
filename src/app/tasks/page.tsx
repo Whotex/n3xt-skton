@@ -133,26 +133,26 @@ export default function TasksPage() {
   return (
     <section className="min-h-screen flex flex-col items-center justify-start pt-6 pb-8 px-3 text-white">
       {/* Caixa de convite */}
-      <div className="w-full max-w-2xl p-4 mb-6 bg-gray-800/80 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold text-yellow-400 mb-2">Invite your friends</h2>
-        <div className="flex items-center">
-          <input
-            type="text"
-            readOnly
-            value={`https://t.me/yamiwolfbot/sakaton?start=${refCode || ""}`}
-            className="flex-1 p-2 bg-gray-900 text-white border border-gray-600 rounded-l focus:outline-none"
-          />
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(`https://t.me/yamiwolfbot/sakaton?start=${refCode || ""}`);
-            }}
-            className="p-2 bg-yellow-500 text-black font-bold rounded-r hover:bg-yellow-600 transition"
-          >
-            Copy
-          </button>
-        </div>
-        <p className="mt-2 text-sm text-gray-300">1 ref = 1000 points</p>
-      </div>
+<div className="w-full max-w-2xl p-4 mb-6 bg-gray-800/80 rounded-lg shadow-lg">
+  <h2 className="text-xl font-bold text-yellow-400 mb-2">Invite your friends</h2>
+  <div className="flex items-center">
+    <input
+      type="text"
+      readOnly
+      value={`https://t.me/yamiwolfbot/sakaton?start=${refCode || ""}`}
+      className="flex-1 p-2 bg-gray-900 text-white border border-gray-600 rounded-l focus:outline-none truncate whitespace-nowrap overflow-hidden"
+    />
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(`https://t.me/yamiwolfbot/sakaton?start=${refCode || ""}`);
+      }}
+      className="p-2 bg-yellow-500 text-black font-bold rounded-r hover:bg-yellow-600 transition"
+    >
+      Copy
+    </button>
+  </div>
+  <p className="mt-2 text-sm text-gray-300">1 ref = 1000 points</p>
+</div>
 
       {/* Seção Available Tasks */}
       <div className="w-full max-w-2xl mb-6">
