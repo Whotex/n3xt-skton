@@ -11,7 +11,7 @@ const navItems = [
 
 export default function BottomNavigation() {
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 p-3">
+    <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 p-3 z-50">
       <ul className="flex justify-around items-center">
         {navItems.map(({ href, label, src }) => (
           <li key={href}>
