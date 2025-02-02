@@ -38,13 +38,13 @@ export default function TopNavigation() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 flex justify-center">
       <div className="w-full max-w-7xl bg-black bg-opacity-50 rounded-xl shadow-md flex items-center justify-between px-6 py-2">
-        {/* Área esquerda: Novo LOGO do jogo */}
-        <div className="flex items-center">
+        {/* Área esquerda: Novo LOGO do jogo (maior) */}
+        <div className="flex items-center mr-4">
           <Image
             src="/LOGO.png"
             alt="SakaTON Logo"
-            width={80}  // Ajuste conforme necessário para um bom visual
-            height={80}
+            width={120}  // Logo maior
+            height={120}
             priority
             className="object-contain drop-shadow-lg"
           />
