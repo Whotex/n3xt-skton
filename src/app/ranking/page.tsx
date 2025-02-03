@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { TrophyIcon } from "@heroicons/react/24/solid";
 
 const API_BASE_URL = "https://sakaton.vercel.app/api"; // URL da API
 
@@ -41,8 +42,7 @@ export default function RankingPage() {
           throw new Error("Ranking não encontrado.");
         }
 
-        // Atualiza os estados com os dados recebidos da API
-        setTopTen(data.top_10); // Top 10 usuários
+        setTopTen(data.top_10);
         setMyRank(data.user_rank?.rank ?? null);
         setMyPoints(data.user_rank?.points ?? null);
       } catch (err) {
@@ -117,25 +117,51 @@ export default function RankingPage() {
           <p className="text-center">Nenhum usuário encontrado.</p>
         ) : (
           <ul className="space-y-4">
-            {topTen.map((user) => (
-              <li
-                key={user.id}
-                className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3"
-              >
-                {/* Posição */}
-                <div className="w-8 text-center text-yellow-400 font-bold">
-                  {user.rank}
-                </div>
-                {/* Nome do usuário */}
-                <div className="flex-1 text-center">
-                  {user.first_name || `Usuário ${user.rank}`}
-                </div>
-                {/* Pontos */}
-                <div className="w-16 text-right text-yellow-300 font-semibold">
-                  {user.points}
-                </div>
-              </li>
-            ))}
+            {topTen.map((user, index) => {
+              let rankColor = "text-yellow-300"; // Padrão
+              let bgColor = "bg-gray-800/50";
+              let iconColor = "";
+
+              if (user.rank === 1) {
+                rankColor = "text-yellow-400"; // Ouro
+                bgColor = "bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-300";
+                iconColor = "text-yellow-600";
+              } else if (user.rank === 2) {
+                rankColor = "text-gray-300"; // Prata
+                bgColor = "bg-gradient-to-r from-gray-400 via-gray-300 to-gray-200";
+                iconColor = "text-gray-500";
+              } else if (user.rank === 3) {
+                rankColor = "text-orange-400"; // Bronze
+                bgColor = "bg-gradient-to-r from-orange-500 via-orange-400 to-orange-300";
+                iconColor = "text-orange-600";
+              }
+
+              return (
+                <motion.li
+                  key={user.id}
+                  className={`flex items-center justify-between ${bgColor} rounded-lg p-3 shadow-md`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  {/* Posição + Ícone se for Top 3 */}
+                  <div className={`w-8 text-center font-bold ${rankColor}`}>
+                    {user.rank}
+                    {user.rank <= 3 && (
+                      <TrophyIcon className={`inline-block h-5 w-5 ml-1 ${iconColor}`} />
+                    )}
+                  </div>
+                  {/* Nome do usuário */}
+                  <div className="flex-1 text-center font-semibold">
+                    {user.first_name || `Usuário ${user.rank}`}
+                  </div>
+                  {/* Pontos */}
+                  <div className="w-16 text-right font-semibold text-yellow-300">
+                    {user.points}
+                  </div>
+                </motion.li>
+              );
+            })}
           </ul>
         )}
       </motion.div>
