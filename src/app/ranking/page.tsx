@@ -99,7 +99,14 @@ export default function RankingPage() {
         </p>
         <p className="text-center">
           Seus pontos:{" "}
-          <span className="text-yellow-300 font-semibold">{myPoints ?? "?"}</span>
+          <span
+            className="text-yellow-300 font-semibold"
+            style={{
+              textShadow: "2px 2px 4px black", // ✅ Adiciona sombra preta para melhor contraste
+            }}
+          >
+            {myPoints ?? "?"}
+          </span>
         </p>
       </motion.div>
 
@@ -155,8 +162,13 @@ export default function RankingPage() {
                   <div className="flex-1 text-center font-semibold">
                     {user.first_name || `Usuário ${user.rank}`}
                   </div>
-                  {/* Pontos */}
-                  <div className="w-16 text-right font-semibold text-yellow-300">
+                  {/* Pontos com sombra para contraste */}
+                  <div
+                    className="w-16 text-right font-semibold text-yellow-300"
+                    style={{
+                      textShadow: "2px 2px 4px black", // ✅ Adiciona sombra preta ao texto
+                    }}
+                  >
                     {user.points}
                   </div>
                 </motion.li>
