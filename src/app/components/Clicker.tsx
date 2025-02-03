@@ -102,7 +102,7 @@ export default function Clicker({ _userId, userPoints }: ClickerProps) {
         whileTap={{ scale: 0.9, rotate: [0, -10, 10, -10, 10, 0], transition: { duration: 0.4 } }}
         onClick={handleClick}
         className="
-          relative w-48 h-48 bg-[url('/coin.png')] bg-no-repeat bg-center bg-contain
+          relative w-48 h-48 bg-[url('/SAKATA.png')] bg-no-repeat bg-center bg-contain
           image-rendering: pixelated shadow-lg focus:outline-none cursor-pointer
         "
       />
